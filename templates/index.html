@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Raffle Ticket Generator</title>
+  <style>
+    body { font-family: sans-serif; max-width: 480px; margin: 40px auto; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input, textarea { width: 100%; box-sizing: border-box; padding: 6px; margin-top: 4px; }
+    textarea { height: 100px; }
+    button { margin-top: 16px; padding: 10px 20px; }
+    #progress-section { display: none; margin-top: 20px; }
+    #error { color: red; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Raffle Ticket Generator</h1>
+  <form id="ticket-form">
+    <label for="event_name">Event Name</label>
+    <input type="text" id="event_name" name="event_name" required>
+
+    <label for="event_date">Event Date</label>
+    <input type="text" id="event_date" name="event_date" required>
+
+    <label for="prizes">Prizes (one per line)</label>
+    <textarea id="prizes" name="prizes"></textarea>
+
+    <label for="start_number">Start Number</label>
+    <input type="number" id="start_number" name="start_number" required min="1">
+
+    <label for="end_number">End Number</label>
+    <input type="number" id="end_number" name="end_number" required min="1">
+
+    <button type="submit">Generate</button>
+  </form>
+
+  <div id="error"></div>
+
+  <div id="progress-section">
+    <progress id="progress-bar" value="0" max="100"></progress>
+    <p id="progress-text"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById("ticket-form");
+    const errorDiv = document.getElementById("error");
+    const progressSection = document.getElementById("progress-section");
+    const progressBar = document.getElementById("progress-bar");
+    const progressText = document.getElementById("progress-text");
+    let pollTimer = null;
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorDiv.textContent = "";
+
+      const response = await fetch("/generate", {
+        method: "POST",
+        body: new FormData(form),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        errorDiv.textContent = data.error || "Something went wrong.";
+        return;
+      }
+
+      progressSection.style.display = "block";
+      pollTimer = setInterval(pollProgress, 1000);
+    });
+
+    async function pollProgress() {
+      const response = await fetch("/progress");
+      const data = await response.json();
+
+      if (data.status === "running") {
+        const pct = data.total > 0 ? Math.round((data.current / data.total) * 100) : 0;
+        progressBar.value = pct;
+        const label = data.phase === "pages" ? "Building pages" : "Generating tickets";
+        progressText.textContent = `${label}... ${data.current}/${data.total}`;
+      } else if (data.status === "done") {
+        clearInterval(pollTimer);
+        progressText.textContent = "Done! Downloading PDF...";
+        window.location = "/download";
+      } else if (data.status === "error") {
+        clearInterval(pollTimer);
+        errorDiv.textContent = data.error;
+      }
+    }
+  </script>
+</body>
+</html>

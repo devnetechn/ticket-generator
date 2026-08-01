@@ -36,3 +36,21 @@ Output:
 output/tickets/ticket_00001.png ...
 output/tickets.pdf
 ```
+
+## Run (web UI)
+
+Instead of editing constants and running the CLI, you can use the local
+web form:
+
+```
+python app.py
+```
+
+Then open `http://127.0.0.1:5000` in a browser. Fill in the event name,
+date, prizes (one per line), and the start/end ticket number range, then
+click Generate. A progress bar tracks the run, and `tickets.pdf`
+auto-downloads when it finishes. Individual PNGs are still written to
+`output/tickets/` on the machine running the server.
+
+The web UI only listens on `127.0.0.1` (this machine only) and runs one
+generation job at a time.
