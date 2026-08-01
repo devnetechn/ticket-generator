@@ -116,3 +116,10 @@ def draw_ticket(draw, x, y, w, h, number, config, fonts):
 
     stub_name_y = y + h - LINE_STEP["stub_small"] - pad
     draw.text((sx, stub_name_y), "Name: ______", font=fonts["stub_small"], fill="black")
+
+
+def create_ticket_image(number, config, fonts):
+    img = Image.new("RGB", (TICKET_W, TICKET_H), "white")
+    draw = ImageDraw.Draw(img)
+    draw_ticket(draw, 0, 0, TICKET_W, TICKET_H, number, config, fonts)
+    return img

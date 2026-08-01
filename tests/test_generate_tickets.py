@@ -46,3 +46,10 @@ def test_draw_ticket_draws_border_and_content():
     # More than just background white should be present (text/border drawn)
     colors = img.getcolors(maxcolors=2_000_000)
     assert len(colors) > 1
+
+
+def test_create_ticket_image_has_expected_size():
+    config = gt.default_config()
+    fonts = gt.build_fonts(config)
+    img = gt.create_ticket_image(7, config, fonts)
+    assert img.size == (gt.TICKET_W, gt.TICKET_H)
