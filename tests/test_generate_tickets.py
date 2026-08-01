@@ -97,3 +97,22 @@ def test_generate_all_creates_expected_files(tmp_path):
 
     # Intermediate working directory must not leak into the output
     assert not (tmp_path / "pages").exists()
+
+
+def test_generate_all_reports_progress_via_callback(tmp_path):
+    config = gt.default_config()
+    config["OUTPUT_DIR"] = str(tmp_path)
+    config["START_NUMBER"] = 1
+    config["TOTAL_TICKETS"] = 3
+
+    calls = []
+    gt.generate_all(
+        config,
+        on_progress=lambda current, total, phase: calls.append((current, total, phase)),
+    )
+
+    ticket_calls = [c for c in calls if c[2] == "tickets"]
+    page_calls = [c for c in calls if c[2] == "pages"]
+
+    assert ticket_calls == [(1, 3, "tickets"), (2, 3, "tickets"), (3, 3, "tickets")]
+    assert page_calls == [(1, 1, "pages")]

@@ -142,7 +142,7 @@ def chunk_numbers(start, total, page_size=10):
     return [numbers[i:i + page_size] for i in range(0, len(numbers), page_size)]
 
 
-def generate_all(config):
+def generate_all(config, on_progress=None):
     tickets_dir = os.path.join(config["OUTPUT_DIR"], "tickets")
     pages_dir = os.path.join(config["OUTPUT_DIR"], "pages")
     os.makedirs(tickets_dir, exist_ok=True)
@@ -155,24 +155,30 @@ def generate_all(config):
     for i, number in enumerate(range(start, start + total), start=1):
         img = create_ticket_image(number, config, fonts)
         img.save(os.path.join(tickets_dir, f"ticket_{number:05d}.png"))
-        if i % 500 == 0 or i == total:
+        if on_progress is not None:
+            on_progress(i, total, "tickets")
+        elif i % 500 == 0 or i == total:
             print(f"Generated {i}/{total} tickets...")
 
     page_chunks = chunk_numbers(start, total)
+    num_pages = len(page_chunks)
     page_paths = []
     for page_num, numbers in enumerate(page_chunks, start=1):
         page_img = create_page(numbers, config, fonts)
         page_path = os.path.join(pages_dir, f"page_{page_num:04d}.png")
         page_img.save(page_path)
         page_paths.append(page_path)
-        if page_num % 100 == 0 or page_num == len(page_chunks):
-            print(f"Built {page_num}/{len(page_chunks)} pages...")
+        if on_progress is not None:
+            on_progress(page_num, num_pages, "pages")
+        elif page_num % 100 == 0 or page_num == num_pages:
+            print(f"Built {page_num}/{num_pages} pages...")
 
     pdf_path = os.path.join(config["OUTPUT_DIR"], "tickets.pdf")
     first_page = Image.open(page_paths[0]).convert("RGB")
     rest_pages = (Image.open(p).convert("RGB") for p in page_paths[1:])
     first_page.save(pdf_path, save_all=True, append_images=rest_pages)
-    print(f"Saved PDF: {pdf_path} ({len(page_paths)} pages)")
+    if on_progress is None:
+        print(f"Saved PDF: {pdf_path} ({len(page_paths)} pages)")
 
     shutil.rmtree(pages_dir)
 
