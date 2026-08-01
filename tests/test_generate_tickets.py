@@ -53,3 +53,17 @@ def test_create_ticket_image_has_expected_size():
     fonts = gt.build_fonts(config)
     img = gt.create_ticket_image(7, config, fonts)
     assert img.size == (gt.TICKET_W, gt.TICKET_H)
+
+
+def test_create_page_has_expected_page_size():
+    config = gt.default_config()
+    fonts = gt.build_fonts(config)
+    page = gt.create_page([1, 2, 3], config, fonts)
+    assert page.size == (gt.PAGE_W, gt.PAGE_H)
+
+
+def test_create_page_handles_partial_last_page():
+    config = gt.default_config()
+    fonts = gt.build_fonts(config)
+    page = gt.create_page([1], config, fonts)
+    assert page.size == (gt.PAGE_W, gt.PAGE_H)

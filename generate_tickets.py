@@ -123,3 +123,15 @@ def create_ticket_image(number, config, fonts):
     draw = ImageDraw.Draw(img)
     draw_ticket(draw, 0, 0, TICKET_W, TICKET_H, number, config, fonts)
     return img
+
+
+def create_page(ticket_numbers, config, fonts):
+    page = Image.new("RGB", (PAGE_W, PAGE_H), "white")
+    draw = ImageDraw.Draw(page)
+    for i, number in enumerate(ticket_numbers):
+        col = i % COLS
+        row = i // COLS
+        x = MARGIN + col * TICKET_W
+        y = MARGIN + row * TICKET_H
+        draw_ticket(draw, x, y, TICKET_W, TICKET_H, number, config, fonts)
+    return page
