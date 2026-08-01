@@ -175,3 +175,7 @@ def generate_all(config):
     print(f"Saved PDF: {pdf_path} ({len(page_paths)} pages)")
 
     shutil.rmtree(pages_dir)
+
+
+if __name__ == "__main__":
+    generate_all(default_config())
