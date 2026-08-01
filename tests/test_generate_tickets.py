@@ -67,3 +67,33 @@ def test_create_page_handles_partial_last_page():
     fonts = gt.build_fonts(config)
     page = gt.create_page([1], config, fonts)
     assert page.size == (gt.PAGE_W, gt.PAGE_H)
+
+
+def test_chunk_numbers_splits_into_groups_of_ten():
+    chunks = gt.chunk_numbers(1, 25)
+    assert len(chunks) == 3
+    assert chunks[0] == list(range(1, 11))
+    assert chunks[1] == list(range(11, 21))
+    assert chunks[2] == list(range(21, 26))
+
+
+def test_generate_all_creates_expected_files(tmp_path):
+    config = gt.default_config()
+    config["OUTPUT_DIR"] = str(tmp_path)
+    config["START_NUMBER"] = 1
+    config["TOTAL_TICKETS"] = 3
+
+    gt.generate_all(config)
+
+    tickets_dir = tmp_path / "tickets"
+    assert (tickets_dir / "ticket_00001.png").exists()
+    assert (tickets_dir / "ticket_00002.png").exists()
+    assert (tickets_dir / "ticket_00003.png").exists()
+    assert len(list(tickets_dir.glob("*.png"))) == 3
+
+    pdf_path = tmp_path / "tickets.pdf"
+    assert pdf_path.exists()
+    assert pdf_path.stat().st_size > 0
+
+    # Intermediate working directory must not leak into the output
+    assert not (tmp_path / "pages").exists()

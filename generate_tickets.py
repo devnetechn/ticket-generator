@@ -135,3 +135,43 @@ def create_page(ticket_numbers, config, fonts):
         y = MARGIN + row * TICKET_H
         draw_ticket(draw, x, y, TICKET_W, TICKET_H, number, config, fonts)
     return page
+
+
+def chunk_numbers(start, total, page_size=10):
+    numbers = list(range(start, start + total))
+    return [numbers[i:i + page_size] for i in range(0, len(numbers), page_size)]
+
+
+def generate_all(config):
+    tickets_dir = os.path.join(config["OUTPUT_DIR"], "tickets")
+    pages_dir = os.path.join(config["OUTPUT_DIR"], "pages")
+    os.makedirs(tickets_dir, exist_ok=True)
+    os.makedirs(pages_dir, exist_ok=True)
+    fonts = build_fonts(config)
+
+    start = config["START_NUMBER"]
+    total = config["TOTAL_TICKETS"]
+
+    for i, number in enumerate(range(start, start + total), start=1):
+        img = create_ticket_image(number, config, fonts)
+        img.save(os.path.join(tickets_dir, f"ticket_{number:05d}.png"))
+        if i % 500 == 0 or i == total:
+            print(f"Generated {i}/{total} tickets...")
+
+    page_chunks = chunk_numbers(start, total)
+    page_paths = []
+    for page_num, numbers in enumerate(page_chunks, start=1):
+        page_img = create_page(numbers, config, fonts)
+        page_path = os.path.join(pages_dir, f"page_{page_num:04d}.png")
+        page_img.save(page_path)
+        page_paths.append(page_path)
+        if page_num % 100 == 0 or page_num == len(page_chunks):
+            print(f"Built {page_num}/{len(page_chunks)} pages...")
+
+    pdf_path = os.path.join(config["OUTPUT_DIR"], "tickets.pdf")
+    first_page = Image.open(page_paths[0]).convert("RGB")
+    rest_pages = (Image.open(p).convert("RGB") for p in page_paths[1:])
+    first_page.save(pdf_path, save_all=True, append_images=rest_pages)
+    print(f"Saved PDF: {pdf_path} ({len(page_paths)} pages)")
+
+    shutil.rmtree(pages_dir)
