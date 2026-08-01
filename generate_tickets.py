@@ -59,3 +59,60 @@ def load_font(path, size):
     except OSError:
         print(f"Warning: font not found at {path}, using default font.")
         return ImageFont.load_default()
+
+
+def build_fonts(config):
+    return {key: load_font(config["FONT_PATH"], size) for key, size in FONT_SIZES.items()}
+
+
+def draw_ticket(draw, x, y, w, h, number, config, fonts):
+    pad = 15
+    stub_w = int(w * 0.25)
+    main_w = w - stub_w
+
+    draw.rectangle([x, y, x + w - 1, y + h - 1], outline="black", width=3)
+
+    divider_x = x + main_w
+    dash_len, gap_len = 10, 6
+    dy = y
+    while dy < y + h:
+        draw.line(
+            [(divider_x, dy), (divider_x, min(dy + dash_len, y + h))],
+            fill="black", width=2,
+        )
+        dy += dash_len + gap_len
+
+    number_text = f"No. {number:05d}"
+
+    # --- Main section ---
+    mx, my = x + pad, y + pad
+    draw.text((mx, my), config["EVENT_NAME"], font=fonts["title"], fill="black")
+
+    bbox = draw.textbbox((0, 0), number_text, font=fonts["number"])
+    number_w = bbox[2] - bbox[0]
+    draw.text(
+        (x + main_w - pad - number_w, my), number_text,
+        font=fonts["number"], fill=config["ACCENT_COLOR"],
+    )
+
+    my += LINE_STEP["title"]
+    draw.text((mx, my), config["EVENT_DATE"], font=fonts["normal"], fill="black")
+    my += LINE_STEP["normal"]
+    for prize in config["PRIZES"]:
+        draw.text((mx, my), prize, font=fonts["small"], fill="black")
+        my += LINE_STEP["small"]
+
+    name_y = y + h - LINE_STEP["normal"] - pad
+    draw.text(
+        (mx, name_y), "Name: _______________________",
+        font=fonts["normal"], fill="black",
+    )
+
+    # --- Stub section ---
+    sx, sy = divider_x + pad, y + pad
+    draw.text((sx, sy), number_text, font=fonts["stub_normal"], fill=config["ACCENT_COLOR"])
+    sy += LINE_STEP["stub_normal"]
+    draw.text((sx, sy), config["EVENT_NAME"], font=fonts["stub_small"], fill="black")
+
+    stub_name_y = y + h - LINE_STEP["stub_small"] - pad
+    draw.text((sx, stub_name_y), "Name: ______", font=fonts["stub_small"], fill="black")
