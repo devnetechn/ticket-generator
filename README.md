@@ -13,12 +13,18 @@ pip install -r requirements.txt
 
 Edit the constants at the top of `generate_tickets.py`:
 
-- `EVENT_NAME`, `EVENT_DATE`, `PRIZES` — text shown on every ticket.
-- `START_NUMBER`, `TOTAL_TICKETS` — the numbered range to generate.
+- `ORG_NAME`, `EVENT_NAME`, `EVENT_DATE`, `SUBTITLE_LINES`, `PRIZES`,
+  `CONSOLATION_TEXT`, `PRICE`, `PROCEEDS_TEXT` — text shown on every ticket.
+- `LOGO_PATH` — optional path to a seal/logo image shown on the stub. Leave
+  blank (or point at a missing file) to leave that space empty.
+- `START_NUMBER`, `TOTAL_TICKETS` — the numbered range to generate. The
+  ticket number is auto-filled on both the main ticket and the stub (no
+  hand-writing needed), so they stay matched for the draw.
 - `OUTPUT_DIR` — where `tickets/` (PNGs) and `tickets.pdf` are written.
-- `FONT_PATH` — path to a `.ttf` font file. Falls back to a basic default
-  font if the path doesn't exist.
-- `ACCENT_COLOR` — RGB tuple used for the ticket number.
+- `FONT_PATH`, `BOLD_FONT_PATH`, `ITALIC_FONT_PATH` — paths to `.ttf` font
+  files. Each falls back to a basic default font if its path doesn't exist.
+- `ACCENT_COLOR` — RGB tuple used for the ticket number and price tag text.
+- `PRICE_BG_COLOR` — RGB tuple used for the price tag strip background.
 
 ## Run
 

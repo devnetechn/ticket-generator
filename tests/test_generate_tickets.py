@@ -10,8 +10,11 @@ import generate_tickets as gt
 def test_default_config_has_all_required_keys():
     config = gt.default_config()
     required_keys = {
-        "EVENT_NAME", "EVENT_DATE", "PRIZES", "START_NUMBER",
-        "TOTAL_TICKETS", "OUTPUT_DIR", "FONT_PATH", "ACCENT_COLOR",
+        "ORG_NAME", "EVENT_NAME", "EVENT_DATE", "SUBTITLE_LINES", "PRIZES",
+        "CONSOLATION_TEXT", "PRICE", "PROCEEDS_TEXT", "LOGO_PATH", "SEAL_TEXT",
+        "START_NUMBER", "TOTAL_TICKETS", "OUTPUT_DIR", "FONT_PATH",
+        "BOLD_FONT_PATH", "ITALIC_FONT_PATH", "TITLE_FONT_PATH",
+        "STUB_FONT_PATH", "STUB_BOLD_FONT_PATH", "ACCENT_COLOR", "PRICE_BG_COLOR",
     }
     assert required_keys.issubset(config.keys())
 
@@ -38,7 +41,7 @@ def test_draw_ticket_draws_border_and_content():
     img = Image.new("RGB", (gt.TICKET_W, gt.TICKET_H), "white")
     draw = ImageDraw.Draw(img)
 
-    gt.draw_ticket(draw, 0, 0, gt.TICKET_W, gt.TICKET_H, 42, config, fonts)
+    gt.draw_ticket(img, draw, 0, 0, gt.TICKET_W, gt.TICKET_H, 42, config, fonts)
 
     # Border line should be drawn near the top-left corner
     assert img.getpixel((5, 1)) != (255, 255, 255)
